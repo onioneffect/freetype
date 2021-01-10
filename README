@@ -1,5 +1,8 @@
 The Freetype font rasterizer in the Go programming language.
 
+This version has modifications by
+[onioneffect on GitHub](https://github.com/onioneffect)! See changes at the end of this file!
+
 To download and install from source:
 $ go get github.com/golang/freetype
 
@@ -19,3 +22,13 @@ AUTHORS file.
 
 Unless otherwise noted, the Freetype-Go source files are distributed
 under the BSD-style license found in the LICENSE file.
+
+## Changes:
+* Modify `freetype.go` to add functions `StrAdvanceWidth` and `StrAlign`.
+* Add example `freetype/advance` to demonstrate how to calculate the advance
+width of a string.
+* Add example `freetype/align` to demonstrate `StrAlign`.
+
+Important note: The examples that I made include
+`"github.com/onioneffect/freetype"`, while the orgiginal examples include
+`"github.com/golang/freetype"`. Only the former has the changes listed above!

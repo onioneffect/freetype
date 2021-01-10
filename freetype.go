@@ -6,7 +6,7 @@
 // The freetype package provides a convenient API to draw text onto an image.
 // Use the freetype/raster and freetype/truetype packages for lower level
 // control over rasterization and TrueType parsing.
-package freetype // import "github.com/golang/freetype"
+package freetype // import "github.com/onioneffect/freetype"
 
 import (
 	"errors"
@@ -79,6 +79,68 @@ type Context struct {
 // into a 26.6 fixed point number of pixels.
 func (c *Context) PointToFixed(x float64) fixed.Int26_6 {
 	return fixed.Int26_6(x * float64(c.dpi) * (64.0 / 72.0))
+}
+
+// StrAdvanceWidth calculates the advance width of a string and returns it.
+// This function borrows code from `DrawString`.
+func (c *Context) StrAdvanceWidth(s string) (fixed.Int26_6, error) {
+	p := Pt(0, 0)
+	if c.f == nil {
+		return fixed.I(0), errors.New("freetype: DrawText called with a nil font")
+	}
+	prev, hasPrev := truetype.Index(0), false
+	for _, rune := range s {
+		index := c.f.Index(rune)
+		if hasPrev {
+			kern := c.f.Kern(c.scale, prev, index)
+			if c.hinting != font.HintingNone {
+				kern = (kern + 32) &^ 63
+			}
+			p.X += kern
+		}
+		advanceWidth, _, _, err := c.glyph(index, p)
+		if err != nil {
+			return fixed.I(0), err
+		}
+		p.X += advanceWidth
+		prev, hasPrev = index, true
+	}
+
+	return p.X, nil
+}
+
+// StrAlign takes two strings: the text to be drawn and the
+// align mode, which can be "center" and "right" on the X axis
+// and "middle" and "bottom" on the Y axis. It returns
+// the advance that should be used so that `s` can be drawn
+// according to whichever of the four options you choose.
+// This function only works on one axis at a time!
+func (c *Context) StrAlign(s string, align string) (fixed.Int26_6, error) {
+	max := c.dst.Bounds().Max
+	var bounds, words fixed.Int26_6
+
+	if align == "center" || align == "right" { // X
+		bounds = fixed.I(max.X)
+		words, _ = c.StrAdvanceWidth(s)
+	} else if align == "middle" || align == "bottom" { // Y
+		bounds = fixed.I(max.Y)
+		words = c.PointToFixed(c.fontSize)
+	} else {
+		return fixed.I(0), errors.New("Invalid align setting for StrAlign")
+	}
+
+	// The way this function is written, aligning the string to the
+	// right/bottom is the default, so now we will adjust our
+	// variables to fit a center/middle alignment, if chosen.
+	if align == "center" || align == "middle" {
+		bounds /= 2
+		words /= 2
+	}
+
+	// If we subtract the two, the result will be the advance
+	// needed for the text to be properly aligned.
+	var ret fixed.Int26_6 = bounds - words
+	return ret, nil
 }
 
 // drawContour draws the given closed contour with the given offset.
