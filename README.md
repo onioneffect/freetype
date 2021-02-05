@@ -30,5 +30,5 @@ width of a string.
 * Add example `freetype/align` to demonstrate `StrAlign`.
 
 Important note: The examples that I made include
-`"github.com/onioneffect/freetype"`, while the orgiginal examples include
+`"github.com/onioneffect/freetype"`, while the original examples include
 `"github.com/golang/freetype"`. Only the former has the changes listed above!
