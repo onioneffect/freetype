@@ -13,8 +13,8 @@ import (
 	"image"
 	"image/draw"
 
-	"github.com/golang/freetype/raster"
-	"github.com/golang/freetype/truetype"
+	"github.com/onioneffect/freetype/raster"
+	"github.com/onioneffect/freetype/truetype"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
@@ -115,14 +115,21 @@ func (c *Context) StrAdvanceWidth(s string) (fixed.Int26_6, error) {
 // the advance that should be used so that `s` can be drawn
 // according to whichever of the four options you choose.
 // This function only works on one axis at a time!
-func (c *Context) StrAlign(s string, align string) (fixed.Int26_6, error) {
+const(
+	ALIGN_CENTER = iota
+	ALIGN_RIGHT
+	ALIGN_MIDDLE
+	ALIGN_BOTTOM
+)
+
+func (c *Context) StrAlign(s string, align int) (fixed.Int26_6, error) {
 	max := c.dst.Bounds().Max
 	var bounds, words fixed.Int26_6
 
-	if align == "center" || align == "right" { // X
+	if align == ALIGN_CENTER || align == ALIGN_RIGHT { // X
 		bounds = fixed.I(max.X)
 		words, _ = c.StrAdvanceWidth(s)
-	} else if align == "middle" || align == "bottom" { // Y
+	} else if align == ALIGN_MIDDLE || align == ALIGN_BOTTOM { // Y
 		bounds = fixed.I(max.Y)
 		words = c.PointToFixed(c.fontSize)
 	} else {
@@ -132,7 +139,7 @@ func (c *Context) StrAlign(s string, align string) (fixed.Int26_6, error) {
 	// The way this function is written, aligning the string to the
 	// right/bottom is the default, so now we will adjust our
 	// variables to fit a center/middle alignment, if chosen.
-	if align == "center" || align == "middle" {
+	if align == ALIGN_CENTER || align == ALIGN_MIDDLE {
 		bounds /= 2
 		words /= 2
 	}

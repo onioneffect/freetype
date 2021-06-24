@@ -122,9 +122,9 @@ func main() {
 	pt := freetype.Pt(10, 10+int(c.PointToFixed(*size)>>6))
 	for i, s := range text {
 		if i % 2 == 0 {
-			pt.X, _ = c.StrAlign(s, "center")
+			pt.X, _ = c.StrAlign(s, freetype.ALIGN_CENTER)
 		} else if i % 3 == 0 {
-			pt.X, _ = c.StrAlign(s, "right")
+			pt.X, _ = c.StrAlign(s, freetype.ALIGN_RIGHT)
 			pt.X -= fixed.I(10)
 		} else {
 			pt.X = fixed.I(10)
@@ -141,9 +141,9 @@ func main() {
 	newfg := image.NewUniform(color.RGBA{0xff, 0x00, 0x00, 0xff})
 	closingString := "This text is at the bottom right!"
 
-	pt.X, _ = c.StrAlign(closingString, "right")
+	pt.X, _ = c.StrAlign(closingString, freetype.ALIGN_RIGHT)
 	pt.X -= fixed.I(10)
-	pt.Y, _ = c.StrAlign(closingString, "bottom")
+	pt.Y, _ = c.StrAlign(closingString, freetype.ALIGN_BOTTOM)
 
 	c.SetSrc(newfg)
 	c.DrawString(closingString, pt)
